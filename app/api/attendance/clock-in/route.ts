@@ -5,12 +5,20 @@ import Shift from "@/models/Shift";
 import Location from "@/models/Location";
 import Attendance from "@/models/Attendance";
 import { enqueueNotification } from "@/lib/queue";
+import { checkRateLimit } from "@/lib/rateLimiter";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
 
     const userId = req.headers.get("x-user-id");
+    const allowed=await checkRateLimit(`rate-limit:clock-in:${userId}`, 5, 60); // 5 requests per minute
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded" },
+        { status: 429 }
+      );
+    }
     const { shiftId, latitude, longitude } = await req.json();
 
     const shift = await Shift.findById(shiftId);
@@ -51,6 +59,8 @@ export async function POST(req: Request) {
       clockInTime: new Date(),
       clockInLocation: { latitude, longitude },
     });
+    const today = new Date().toISOString().split("T")[0]
+    await redis.hincrby(`stats:${shift.companyId}:${today}`, "clockins", 1);
     await enqueueNotification({
        type: "clock-in",
        employeeId: userId,

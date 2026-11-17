@@ -22,6 +22,15 @@ export async function POST(req: Request) {
     attendance.clockOutTime = new Date();
     attendance.status = "clocked-out";
     await attendance.save();
+    const hoursWorked =
+  (attendance.clockOutTime.getTime() - attendance.clockInTime.getTime()) /
+  (1000 * 60 * 60)
+  const today = new Date().toISOString().split("T")[0];
+await redis.hincrbyfloat(
+  `stats:${attendance.companyId}:${today}`,
+  "totalHours",
+  hoursWorked
+);
 
     await redis.publish(
       `attendance:${attendance.companyId}`,
