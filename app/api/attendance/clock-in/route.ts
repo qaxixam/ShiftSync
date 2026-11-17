@@ -4,6 +4,7 @@ import redis from "@/lib/redis";
 import Shift from "@/models/Shift";
 import Location from "@/models/Location";
 import Attendance from "@/models/Attendance";
+import { enqueueNotification } from "@/lib/queue";
 
 export async function POST(req: Request) {
   try {
@@ -50,6 +51,23 @@ export async function POST(req: Request) {
       clockInTime: new Date(),
       clockInLocation: { latitude, longitude },
     });
+    await enqueueNotification({
+       type: "clock-in",
+       employeeId: userId,
+        shiftId,
+        time: attendance.clockInTime,
+        });
+        await redis.zincrby(`leaderboard:${shift.companyId}`, 1, userId as string);
+    await redis.publish(
+  `attendance:${shift.companyId}`,
+  JSON.stringify({
+    employeeId: userId,
+    shiftId,
+    status: "clocked-in",
+    time: attendance.clockInTime,
+  })
+);
+
 
     return NextResponse.json({ message: "Clocked in successfully", attendance });
   } catch (err) {

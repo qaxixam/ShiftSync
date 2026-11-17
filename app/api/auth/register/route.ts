@@ -1,4 +1,5 @@
 import { signToken } from "@/lib/auth";
+import { connectDB } from "@/lib/mongodb";
 import Company from "@/models/Company";
 import User from "@/models/User";
 
@@ -8,6 +9,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req:Request){
    try {
+    await connectDB()
      const {name, email, password, companyName}=await req.json();
 
      if (!name || !email || !password || !companyName) {
