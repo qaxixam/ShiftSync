@@ -61,6 +61,7 @@ export async function POST(req: Request) {
     });
     const today = new Date().toISOString().split("T")[0]
     await redis.hincrby(`stats:${shift.companyId}:${today}`, "clockins", 1);
+    await redis.pfadd(`active:${shift.companyId}:${today}`, userId as string);
     await enqueueNotification({
        type: "clock-in",
        employeeId: userId,
