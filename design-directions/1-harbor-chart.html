@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShiftSync · Direction 1 · Harbor Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Calm, trustworthy, a little playful: sea-glass paper, deep harbor ink, one tangerine buoy. */
+:root{
+  --paper:#E8EEEA; --panel:#F6F8F5; --ink:#12241E; --muted:#5C6E66; --line:#C9D5CE;
+  --tide:#1F6F5B; --tide-soft:#CFE5DC; --buoy:#F26B21; --buoy-soft:#FBDDCB; --sand:#EFE3C2; --sand-ink:#6B5A1E;
+  --r-panel:16px; --r-chip:999px; --r-bar:8px;
+  --sans:"Bricolage Grotesque",system-ui,sans-serif; --mono:"DM Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 20px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;letter-spacing:-.02em}
+.brand i{width:26px;height:26px;border-radius:50% 50% 50% 4px;background:var(--tide);display:block;position:relative}
+.brand i::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--buoy)}
+nav{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-chip);padding:4px}
+nav a{padding:6px 14px;border-radius:var(--r-chip);color:var(--muted);text-decoration:none;font-weight:500;font-size:14px}
+nav a.on{background:var(--ink);color:var(--paper)}
+h1{font-size:clamp(26px,4vw,38px);line-height:1.1;letter-spacing:-.03em;font-weight:700;max-width:18ch}
+.sub{color:var(--muted);margin-top:6px}
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:8px 0 22px}
+.btn{font:600 14px var(--sans);border:1px solid var(--ink);background:var(--ink);color:var(--paper);height:42px;padding:0 18px;border-radius:var(--r-chip);cursor:pointer;transition:transform .15s}
+.btn:active{transform:scale(.96)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.buoy{background:var(--buoy);border-color:var(--buoy);color:#fff}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-panel);padding:18px}
+.panel h2{font-size:16px;font-weight:600;letter-spacing:-.01em;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.panel h2 small{font:400 12px var(--mono);color:var(--muted)}
+.stat{grid-column:span 3}.stat b{display:block;font:500 34px/1 var(--mono);letter-spacing:-.04em;margin:8px 0 4px}
+.stat span{color:var(--muted);font-size:13px}.stat em{font-style:normal;font-size:12px;color:var(--tide);font-weight:600}
+.stat.warn b{color:var(--buoy)}
+.roster{grid-column:span 8}.side{grid-column:span 4;display:flex;flex-direction:column;gap:16px}
+.axis,.row{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center}
+.axis{color:var(--muted);font:400 11px var(--mono);margin-bottom:6px}
+.axis div:last-child{display:flex;justify-content:space-between}
+.row{padding:7px 0;border-top:1px dashed var(--line)}
+.who{display:flex;flex-direction:column;line-height:1.25}.who b{font-weight:600;font-size:14px}.who small{color:var(--muted);font-size:12px}
+.track{position:relative;height:34px;background:repeating-linear-gradient(90deg,transparent 0 calc(100%/6 - 1px),var(--line) calc(100%/6 - 1px) calc(100%/6));border-radius:var(--r-bar)}
+.bar{position:absolute;top:3px;bottom:3px;border-radius:var(--r-bar);background:var(--tide-soft);color:var(--tide);display:flex;align-items:center;padding:0 9px;font:500 12px var(--mono);white-space:nowrap;overflow:hidden}
+.bar.live{background:var(--tide);color:#fff}
+.bar.ot{background:var(--buoy-soft);color:#9A3A07}
+.bar.open{background:transparent;border:1.5px dashed var(--buoy);color:var(--buoy)}
+.now{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--buoy);left:40.74%}
+.now::before{content:"13:20";position:absolute;top:-17px;left:-14px;font:500 10px var(--mono);color:var(--buoy)}
+.feed{list-style:none;padding:0;display:grid;gap:10px}
+.feed li{display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--tide);display:inline-block;margin-right:8px}
+.dot.out{background:var(--muted)}
+.feed time{color:var(--muted);font:400 12px var(--mono)}
+.open-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
+.open-item:first-of-type{border-top:0}
+.open-item b{font-weight:600}.open-item small{display:block;color:var(--muted)}
+.chip{display:inline-block;border-radius:var(--r-chip);padding:2px 9px;font-size:12px;font-weight:600;background:var(--sand);color:var(--sand-ink)}
+.lb{list-style:none;padding:0;display:grid;gap:8px}
+.lb li{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center}
+.lb .rk{font:500 13px var(--mono);color:var(--muted)}
+.lb .meter{height:6px;border-radius:6px;background:var(--tide-soft);margin-top:4px;overflow:hidden}.lb .meter i{display:block;height:100%;background:var(--tide)}
+.phone{grid-column:span 12;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:center;background:var(--ink);color:var(--paper);border-radius:var(--r-panel);padding:24px}
+.phone p{color:#A9BDB4;max-width:46ch;margin-top:6px}.phone h2{font-size:22px;letter-spacing:-.02em;margin:0}
+.device{background:var(--panel);color:var(--ink);border-radius:28px;padding:18px;border:6px solid #0A1612}
+.device .where{display:flex;align-items:center;gap:8px;color:var(--tide);font-weight:600;font-size:13px}
+.ring{width:150px;height:150px;border-radius:50%;margin:14px auto;display:grid;place-items:center;background:radial-gradient(circle,var(--tide-soft) 0 58%,transparent 59%),conic-gradient(var(--tide) 0 92%,var(--line) 0);text-align:center}
+.ring b{font:500 22px var(--mono)}.ring small{display:block;color:var(--muted);font-size:12px}
+.device .btn{width:100%;background:var(--tide);border-color:var(--tide);color:#fff;height:48px}
+@media (max-width:900px){.stat{grid-column:span 6}.roster,.side{grid-column:span 12}.phone{grid-template-columns:1fr}.axis,.row{grid-template-columns:78px 1fr}}
+@media (max-width:520px){.wrap{padding:14px}nav{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><i aria-hidden="true"></i>ShiftSync</div>
+    <nav aria-label="Main"><a class="on" href="#">Today</a><a href="#">Roster</a><a href="#">Marketplace</a><a href="#">People</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>14 of 21 are on site, 3 shifts need someone.</h1>
+      <p class="sub">Harbor &amp; Pine Cafés · Tuesday 17 November</p>
+    </div>
+    <div style="display:flex;gap:8px"><button class="btn ghost">Export week</button><button class="btn">New shift</button></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel stat"><span>On site now</span><b>14</b><em>2 more due by 15:00</em></div>
+    <div class="panel stat warn"><span>Open shifts</span><b>3</b><em style="color:var(--buoy)">1 starts in 3 h</em></div>
+    <div class="panel stat"><span>Hours today</span><b>96.5</b><em>on plan</em></div>
+    <div class="panel stat warn"><span>Overtime risk</span><b>2</b><em style="color:var(--buoy)">Noor, Dev</em></div>
+
+    <section class="panel roster" aria-label="Today's roster">
+      <h2>Roster <small>06:00 – 24:00</small></h2>
+      <div class="axis"><div></div><div><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span></div></div>
+      <div class="row"><div class="who"><b>Amira Khan</b><small>Counter</small></div><div class="track"><span class="now"></span><div class="bar live" style="left:5.56%;width:44.44%">06:58 – 15:00</div></div></div>
+      <div class="row"><div class="who"><b>Dev Patel</b><small>Kitchen</small></div><div class="track"><div class="bar live" style="left:7.2%;width:42.8%">07:14 – 15:00 · late</div></div></div>
+      <div class="row"><div class="who"><b>Noor Ahmed</b><small>Counter</small></div><div class="track"><div class="bar ot" style="left:16.67%;width:58.33%">09:00 – 19:30 · overtime</div></div></div>
+      <div class="row"><div class="who"><b>Lena Meyer</b><small>Floor</small></div><div class="track"><div class="bar" style="left:27.78%;width:44.44%">11:00 – 19:00</div></div></div>
+      <div class="row"><div class="who"><b>Tomás Reyes</b><small>Kitchen</small></div><div class="track"><div class="bar" style="left:50%;width:44.44%">15:00 – 23:00</div></div></div>
+      <div class="row"><div class="who"><b>Open</b><small>3 unfilled</small></div><div class="track"><div class="bar open" style="left:33.33%;width:22.22%">12:00 – 16:00</div><div class="bar open" style="left:61.11%;width:33.33%">17:00 – 23:00</div></div></div>
+    </section>
+
+    <aside class="side">
+      <section class="panel" aria-label="Live activity">
+        <h2>Live <small>updating</small></h2>
+        <ul class="feed">
+          <li><span><span class="dot"></span>Dev clocked in · 38 m from door</span><time>13:14</time></li>
+          <li><span><span class="dot out"></span>Sam clocked out</span><time>13:02</time></li>
+          <li><span><span class="dot"></span>Amira claimed Fri 17:00</span><time>12:51</time></li>
+          <li><span><span class="dot"></span>Lena clocked in</span><time>10:57</time></li>
+        </ul>
+      </section>
+      <section class="panel" aria-label="Shift marketplace">
+        <h2>Open shifts <small>3</small></h2>
+        <div class="open-item"><div><b>Wed 07:00 – 15:00</b><small>Harbor St · <span class="chip">Counter</span></small></div><button class="btn buoy" style="height:38px">Claim</button></div>
+        <div class="open-item"><div><b>Today 17:00 – 23:00</b><small>Pier Rd · <span class="chip">Closing</span></small></div><button class="btn buoy" style="height:38px">Claim</button></div>
+        <div class="open-item"><div><b>Sat 10:00 – 16:00</b><small>Harbor St · <span class="chip">Floor</span></small></div><button class="btn buoy" style="height:38px">Claim</button></div>
+      </section>
+      <section class="panel" aria-label="Leaderboard">
+        <h2>Most on-time <small>30 days</small></h2>
+        <ol class="lb">
+          <li><span class="rk">1</span><div>Amira Khan<div class="meter"><i style="width:100%"></i></div></div><span class="mono">28</span></li>
+          <li><span class="rk">2</span><div>Lena Meyer<div class="meter"><i style="width:89%"></i></div></div><span class="mono">25</span></li>
+          <li><span class="rk">3</span><div>Tomás Reyes<div class="meter"><i style="width:79%"></i></div></div><span class="mono">22</span></li>
+        </ol>
+      </section>
+    </aside>
+
+    <section class="phone" aria-label="Employee phone view">
+      <div><h2>What staff see on their phone</h2><p>One big action. The ring shows how close you are to the door, and the button wakes up when you are inside the radius.</p></div>
+      <div class="device">
+        <div class="where"><span class="dot"></span>Harbor St · 38 m away</div>
+        <div class="ring"><div><b>07:00</b><small>shift starts</small></div></div>
+        <button class="btn">Clock in</button>
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

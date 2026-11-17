@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0B1F3A">
+<title>ShiftSync · Boarding Pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=B612+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Concept 6, "Boarding Pass": a shift is a ticket. Gate = location, seat = role, boards/closes = start/end.
+   Airport signage type (Barlow Condensed, B612 Mono) on a departures-board header. Claiming a shift is boarding it. */
+:root{
+  --navy:#0B1F3A; --navy-2:#13294A; --sky:#E8EFF7; --paper:#fff; --ink:#0F1B2D; --muted:#586579; --line:#D3DCE8;
+  --sun:#FFC933; --coral:#E8453C; --green:#1F8A5B;
+  --r:14px; --cond:"Barlow Condensed",system-ui,sans-serif; --sans:"Barlow",system-ui,sans-serif; --mono:"B612 Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--sky);color:var(--ink);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--coral);outline-offset:3px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--sun);color:#111;padding:10px 14px;border-radius:8px;z-index:9}.skip:focus{top:12px}
+.board{background:var(--navy);color:#fff}
+.board .in{max-width:1280px;margin:0 auto;padding:0 24px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;min-height:60px}
+.brand{font:700 24px var(--cond);letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px}
+nav{display:flex;gap:2px}nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;color:#B7C5DA;text-decoration:none;font:600 17px var(--cond);letter-spacing:.04em;border-radius:8px;transition:background-color .15s,color .15s}
+nav a:hover{background:var(--navy-2);color:#fff}nav a[aria-current=page]{color:var(--sun)}
+.dep{padding:6px 0 22px}
+.dep h1{font:700 clamp(32px,5vw,56px)/1 var(--cond);letter-spacing:.01em;text-wrap:balance;max-width:20ch;margin:10px 0 6px}
+.dep p{color:#B7C5DA}
+.split{display:grid;grid-template-columns:repeat(3,auto);gap:8px;margin-top:16px;width:max-content;max-width:100%}
+.flap{background:var(--navy-2);border:1px solid #28406a;border-radius:8px;padding:8px 16px;min-width:130px}
+.flap b{display:block;font:700 40px/1 var(--mono);letter-spacing:-.06em;color:var(--sun)}.flap span{font:500 14px var(--cond);letter-spacing:.06em;color:#B7C5DA}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 24px 56px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+h2{font:700 20px var(--cond);letter-spacing:.06em;color:var(--navy);margin:0 0 10px}
+.tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+.t{display:grid;grid-template-columns:minmax(0,1fr) 96px;background:var(--paper);border-radius:var(--r);position:relative;box-shadow:0 1px 0 #0B1F3A22;transition:transform .15s ease-out}
+.t:hover{transform:translateY(-2px)}
+.t::before,.t::after{content:"";position:absolute;right:86px;width:20px;height:20px;border-radius:50%;background:var(--sky)}
+.t::before{top:-10px}.t::after{bottom:-10px}
+.main{padding:14px 16px 14px;border-right:2px dashed var(--line)}
+.stripe{height:6px;border-radius:3px;background:var(--sun);margin-bottom:10px}
+.t.late .stripe{background:var(--coral)}.t.ok .stripe{background:var(--green)}.t.idle .stripe{background:var(--line)}
+.who{font:700 26px/1.05 var(--cond);letter-spacing:.01em}
+.meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.meta small{display:block;font:600 11px var(--cond);letter-spacing:.1em;color:var(--muted)}.meta b{font:700 15px var(--mono);letter-spacing:-.03em}.meta b.t2{font-family:var(--cond);font-size:20px;letter-spacing:0}
+.stub{padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;text-align:center}
+.bc{width:56px;height:42px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 12px)}
+.stub .st{font:700 13px var(--cond);letter-spacing:.08em}
+.st.ok{color:var(--green)}.st.late{color:var(--coral)}.st.idle{color:var(--muted)}
+.t.open{background:transparent;border:2px dashed #8aa0be;box-shadow:none}
+.t.open::before,.t.open::after{display:none}.t.open .main{border-right-color:#8aa0be}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:2px solid var(--navy);background:var(--navy);color:#fff;font:700 18px var(--cond);letter-spacing:.05em;cursor:pointer;transition:transform .12s,background-color .15s}
+.btn:hover{background:#17335e}.btn:active{transform:scale(.96)}.btn.sun{background:var(--sun);border-color:var(--sun);color:#1a1300}.btn.sun:hover{background:#ffd75e}
+.side{display:grid;gap:16px}
+.card{background:var(--paper);border-radius:var(--r);padding:16px}
+.job{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.job:first-of-type{border-top:0}
+.job b{display:block;font:700 16px var(--mono);letter-spacing:-.03em}.job small{color:var(--muted)}
+.phone .where{color:var(--green);font-weight:600;font-size:14px}.phone .time{font:700 54px/1 var(--mono);letter-spacing:-.07em;margin:6px 0 10px}.phone .btn{width:100%;min-height:56px;font-size:22px}
+.lb{list-style:none;padding:0}.lb li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;padding:9px 0;border-top:1px solid var(--line);align-items:center}.lb li:first-child{border-top:0}.lb .n{font:700 14px var(--mono);color:var(--muted)}
+.feed{list-style:none;padding:0;display:grid;gap:8px;font-size:14px}.feed li{display:flex;justify-content:space-between;gap:10px}.feed time{font:400 12px var(--mono);color:var(--muted)}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}nav{display:none}.split{grid-template-columns:repeat(3,1fr);width:100%}.flap{min-width:0;padding:8px 10px}.flap b{font-size:30px}}
+@media (max-width:420px){.tickets{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#passes">Skip to Today’s Passes</a>
+<div class="board"><div class="in">
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 26 26" fill="none" aria-hidden="true"><path d="M3 15 23 5l-5 17-5-7-5-1Z" fill="#FFC933"/></svg>SHIFTSYNC</div>
+    <nav aria-label="Main"><a href="#" aria-current="page">DEPARTURES</a><a href="#">ROSTER</a><a href="#">UNCLAIMED</a><a href="#">ATTENDANCE</a><a href="#">CREW</a></nav>
+  </header>
+  <div class="dep">
+    <p class="num" style="font-size:13px">TUE 17 NOV 2026 · HARBOR &amp; PINE CAFÉS</p>
+    <h1>14 Crew Boarded, 3 Passes Unclaimed</h1>
+    <div class="split" role="group" aria-label="Today at a glance">
+      <div class="flap"><b>14<span style="font-size:16px;color:#7f93b0">/21</span></b><span>ON SITE</span></div>
+      <div class="flap"><b>3</b><span>UNCLAIMED</span></div>
+      <div class="flap"><b>2</b><span>OVERTIME RISK</span></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <div class="layout">
+    <main id="passes">
+      <h2>Today’s Passes</h2>
+      <div class="tickets">
+        <article class="t ok"><div class="main"><div class="stripe"></div><div class="who">Amira Khan</div>
+          <div class="meta"><div><small>GATE</small><b class="t2">Harbor St</b></div><div><small>SEAT</small><b class="t2">Counter</b></div><div><small>BOARDS</small><b>07:00</b></div></div>
+          <div class="meta"><div><small>CLOSES</small><b>15:00</b></div><div><small>CHECKED IN</small><b>06:58</b></div><div></div></div></div>
+          <div class="stub"><div class="bc" aria-hidden="true"></div><span class="st ok">ON BOARD</span></div></article>
+
+        <article class="t late"><div class="main"><div class="stripe"></div><div class="who">Dev Patel</div>
+          <div class="meta"><div><small>GATE</small><b class="t2">Harbor St</b></div><div><small>SEAT</small><b class="t2">Kitchen</b></div><div><small>BOARDS</small><b>07:00</b></div></div>
+          <div class="meta"><div><small>CLOSES</small><b>15:00</b></div><div><small>CHECKED IN</small><b>07:14</b></div><div></div></div></div>
+          <div class="stub"><div class="bc" aria-hidden="true"></div><span class="st late">LATE 14 MIN</span></div></article>
+
+        <article class="t late"><div class="main"><div class="stripe"></div><div class="who">Noor Ahmed</div>
+          <div class="meta"><div><small>GATE</small><b class="t2">Pier Rd</b></div><div><small>SEAT</small><b class="t2">Counter</b></div><div><small>BOARDS</small><b>09:00</b></div></div>
+          <div class="meta"><div><small>CLOSES</small><b>19:30</b></div><div><small>LENGTH</small><b>10.5 H</b></div><div></div></div></div>
+          <div class="stub"><div class="bc" aria-hidden="true"></div><span class="st late">OVERTIME</span></div></article>
+
+        <article class="t ok"><div class="main"><div class="stripe"></div><div class="who">Lena Meyer</div>
+          <div class="meta"><div><small>GATE</small><b class="t2">Pier Rd</b></div><div><small>SEAT</small><b class="t2">Floor</b></div><div><small>BOARDS</small><b>11:00</b></div></div>
+          <div class="meta"><div><small>CLOSES</small><b>19:00</b></div><div><small>CHECKED IN</small><b>10:57</b></div><div></div></div></div>
+          <div class="stub"><div class="bc" aria-hidden="true"></div><span class="st ok">ON BOARD</span></div></article>
+
+        <article class="t idle"><div class="main"><div class="stripe"></div><div class="who">Tomás Reyes</div>
+          <div class="meta"><div><small>GATE</small><b class="t2">Harbor St</b></div><div><small>SEAT</small><b class="t2">Kitchen</b></div><div><small>BOARDS</small><b>15:00</b></div></div>
+          <div class="meta"><div><small>CLOSES</small><b>23:00</b></div><div><small>STATUS</small><b class="t2">In 1 h 40</b></div><div></div></div></div>
+          <div class="stub"><div class="bc" aria-hidden="true"></div><span class="st idle">SCHEDULED</span></div></article>
+
+        <article class="t open"><div class="main"><div class="who" style="color:var(--muted)">Unclaimed</div>
+          <div class="meta"><div><small>GATE</small><b class="t2">Pier Rd</b></div><div><small>SEAT</small><b class="t2">Closing</b></div><div><small>BOARDS</small><b>17:00</b></div></div>
+          <div class="meta"><div><small>CLOSES</small><b>23:00</b></div><div></div><div></div></div></div>
+          <div class="stub"><span class="st idle">OPEN</span><button class="btn sun" type="button" aria-label="Assign unclaimed Today 17:00 pass">ASSIGN</button></div></article>
+      </div>
+    </main>
+
+    <aside class="side">
+      <section class="card phone" aria-labelledby="ph"><h2 id="ph">Crew Phone</h2><div class="where">Inside the gate zone · 38 m</div><div class="time">07:00</div><button class="btn sun" type="button">CHECK IN</button></section>
+      <section class="card" aria-labelledby="u"><h2 id="u">Unclaimed Passes</h2>
+        <div class="job"><div><b>Today 17:00</b><small>Pier Rd · Closing</small></div><button class="btn" type="button" aria-label="Board Today 17:00 shift">BOARD</button></div>
+        <div class="job"><div><b>Wed 07:00</b><small>Harbor St · Counter</small></div><button class="btn" type="button" aria-label="Board Wednesday 07:00 shift">BOARD</button></div>
+        <div class="job"><div><b>Sat 10:00</b><small>Harbor St · Floor</small></div><button class="btn" type="button" aria-label="Board Saturday 10:00 shift">BOARD</button></div>
+      </section>
+      <section class="card" aria-labelledby="f"><h2 id="f">Announcements</h2>
+        <ul class="feed" aria-live="polite"><li><span>Dev checked in at Harbor St</span><time>13:14</time></li><li><span>Sam checked out</span><time>13:02</time></li><li><span>Amira boarded Fri 17:00</span><time>12:51</time></li></ul>
+      </section>
+      <section class="card" aria-labelledby="l"><h2 id="l">Frequent Flyers · 30 Days</h2>
+        <ol class="lb"><li><span class="n">1</span>Amira Khan<span class="num">28</span></li><li><span class="n">2</span>Lena Meyer<span class="num">25</span></li><li><span class="n">3</span>Tomás Reyes<span class="num">22</span></li></ol>
+      </section>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

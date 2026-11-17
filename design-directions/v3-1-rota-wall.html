@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#E9ECEE">
+<title>ShiftSync · Rota Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Gaegu:wght@700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Concept 1, "Rota Wall": the whiteboard rota every kitchen has, made trustworthy.
+   Aluminium frame, marker headings, sticky shift tiles in one pastel per person. Playful, but every tile is a real button. */
+:root{
+  --room:#E9ECEE; --frame:#BFC5CA; --board:#FDFDFB; --grid:#D5DADD; --ink:#1D2530; --muted:#566170; --marker:#1E4FA3; --marker-red:#C2412D;
+  --p1:#FBD9C4; --p2:#CFE8D6; --p3:#D6E1F7; --p4:#F7E3A6; --p5:#E7D6F0;
+  --r:10px; --sans:"Figtree",system-ui,sans-serif; --hand:"Gaegu",cursive; --mono:"DM Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--room);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--marker);outline-offset:2px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;z-index:9}.skip:focus{top:12px}
+.wrap{max-width:1300px;margin:0 auto;padding:18px 20px 48px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.brand{font-weight:800;font-size:20px;letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.brand i{width:26px;height:26px;border-radius:50%;background:var(--p4);border:2px solid var(--ink);display:block;box-shadow:inset -4px -4px 0 #0002}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:600;transition:background-color .15s,color .15s}
+nav a:hover{background:#fff;color:var(--ink)}nav a[aria-current=page]{background:var(--ink);color:#fff}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.frame{background:var(--board);border:10px solid var(--frame);border-radius:14px;box-shadow:0 2px 0 #0002,inset 0 0 0 1px var(--grid);padding:18px 18px 22px;overflow-x:auto}
+.frame-in{min-width:760px}
+.hd{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:10px}
+.hd h1{font:700 clamp(34px,5vw,52px)/1 var(--hand);color:var(--marker);letter-spacing:.01em}
+.hd p{color:var(--muted)}
+.week{display:grid;grid-template-columns:96px repeat(5,minmax(0,1fr));border-top:2px solid var(--grid);border-left:2px solid var(--grid)}
+.week>*{border-right:2px solid var(--grid);border-bottom:2px solid var(--grid);padding:8px;min-height:92px}
+.dh{min-height:0!important;font:700 22px/1.1 var(--hand);color:var(--ink);padding:8px 10px!important;position:relative}
+.dh small{font:500 12px var(--mono);color:var(--muted);display:block}
+.dh.today::after{content:"";position:absolute;inset:3px 6px;border:3px solid var(--marker-red);border-radius:50%/60%;transform:rotate(-2deg);pointer-events:none}
+.who{display:flex;gap:8px;align-items:center;padding:8px!important}
+.mag{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;border:2px solid var(--ink);box-shadow:inset -3px -3px 0 #0002,0 2px 0 #0003;flex:none}
+.who b{display:block;font-size:14px;line-height:1.15}.who small{color:var(--muted);font-size:12px}
+.tile{display:block;width:100%;text-align:left;border:0;border-radius:4px 4px 4px 14px;padding:7px 9px;font:500 13px var(--mono);color:var(--ink);cursor:pointer;box-shadow:0 2px 0 #0002;margin-bottom:6px;transition:transform .15s ease-out}
+.tile:hover{transform:translateY(-2px)}.tile:active{transform:scale(.97)}
+.tile small{display:block;font:600 11px var(--sans);color:#3b4655;margin-top:1px}
+.t1{background:var(--p1)}.t2{background:var(--p2)}.t3{background:var(--p3)}.t4{background:var(--p4)}.t5{background:var(--p5)}
+.tile.ot{outline:2px solid var(--marker-red);outline-offset:-2px}
+.tile.open{background:transparent;border:2px dashed #7B8794;box-shadow:none;border-radius:6px;font-family:var(--sans);font-weight:700}
+.tile.open span{display:block;font-family:var(--mono);font-weight:500}
+.today-col{background:#F4F8FF}
+.side{display:grid;gap:16px}
+.card{background:#fff;border:2px solid var(--ink);border-radius:var(--r);padding:16px;box-shadow:3px 3px 0 var(--ink)}
+.card h2{font:700 24px/1 var(--hand);margin-bottom:8px}
+.big{font:500 54px/1 var(--mono);letter-spacing:-.05em}.big small{font-size:20px;color:var(--muted)}
+.mags{display:flex;margin:10px 0 4px}.mags .mag{margin-left:-8px;width:30px;height:30px;font-size:11px}.mags .mag:first-child{margin-left:0}
+.btn{min-height:44px;padding:0 16px;border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:#fff;font:700 15px var(--sans);cursor:pointer;transition:transform .12s,background-color .15s}
+.btn:hover{background:#2e3b4c}.btn:active{transform:scale(.96)}.btn.light{background:#fff;color:var(--ink)}.btn.light:hover{background:var(--p4)}
+.feed{list-style:none;padding:0;display:grid;gap:8px;font-size:14px}.feed li{display:flex;justify-content:space-between;gap:10px}.feed time{font:400 13px var(--mono);color:var(--muted)}
+.stage{background:var(--room);border:2px solid var(--ink);border-radius:var(--r);padding:12px;display:grid;gap:10px}
+.stage .btn{width:100%;min-height:52px;font-size:17px;background:var(--marker);border-color:var(--marker)}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.tile,.btn{transition:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#board">Skip to the Board</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"></i>ShiftSync</div>
+    <nav aria-label="Main"><a href="#" aria-current="page">Rota</a><a href="#">Open Shifts</a><a href="#">Attendance</a><a href="#">Team</a></nav>
+  </header>
+  <div class="layout">
+    <main id="board" class="frame"><div class="frame-in">
+      <div class="hd"><h1>This Week’s Rota</h1><p class="num">16 – 20 Nov · Harbor &amp; Pine</p></div>
+      <div class="week" role="grid" aria-label="Weekly rota">
+        <div class="dh" role="columnheader">&nbsp;</div>
+        <div class="dh" role="columnheader">Mon<small>16</small></div>
+        <div class="dh today today-col" role="columnheader">Tue<small>17 · Today</small></div>
+        <div class="dh" role="columnheader">Wed<small>18</small></div>
+        <div class="dh" role="columnheader">Thu<small>19</small></div>
+        <div class="dh" role="columnheader">Fri<small>20</small></div>
+
+        <div class="who"><span class="mag" style="background:var(--p1)" aria-hidden="true">AK</span><div><b>Amira</b><small class="num">32 h</small></div></div>
+        <div><button class="tile t1" type="button">07:00–15:00<small>Counter</small></button></div>
+        <div class="today-col"><button class="tile t1" type="button">07:00–15:00<small>On site</small></button></div>
+        <div><button class="tile t1" type="button">07:00–15:00<small>Counter</small></button></div><div></div>
+        <div><button class="tile t1" type="button">17:00–23:00<small>Claimed</small></button></div>
+
+        <div class="who"><span class="mag" style="background:var(--p3)" aria-hidden="true">DP</span><div><b>Dev</b><small class="num">40 h</small></div></div>
+        <div><button class="tile t3" type="button">07:00–15:00<small>Kitchen</small></button></div>
+        <div class="today-col"><button class="tile t3" type="button">07:00–15:00<small>Late 14 min</small></button></div>
+        <div></div><div><button class="tile t3" type="button">07:00–15:00<small>Kitchen</small></button></div><div></div>
+
+        <div class="who"><span class="mag" style="background:var(--p4)" aria-hidden="true">NA</span><div><b>Noor</b><small class="num">38.5 h</small></div></div>
+        <div></div>
+        <div class="today-col"><button class="tile t4 ot" type="button">09:00–19:30<small>Overtime 10.5 h</small></button></div>
+        <div></div><div><button class="tile t4" type="button">09:00–17:00<small>Counter</small></button></div><div></div>
+
+        <div class="who"><span class="mag" style="background:var(--p2)" aria-hidden="true">LM</span><div><b>Lena</b><small class="num">32 h</small></div></div>
+        <div><button class="tile t2" type="button">11:00–19:00<small>Floor</small></button></div>
+        <div class="today-col"><button class="tile t2" type="button">11:00–19:00<small>On site</small></button></div>
+        <div></div><div></div>
+        <div><button class="tile t2" type="button">11:00–19:00<small>Floor</small></button></div>
+
+        <div class="who"><span class="mag" style="background:var(--p5)" aria-hidden="true">TR</span><div><b>Tomás</b><small class="num">24 h</small></div></div>
+        <div></div>
+        <div class="today-col"><button class="tile t5" type="button">15:00–23:00<small>Starts in 1 h 40</small></button></div>
+        <div></div><div><button class="tile t5" type="button">15:00–23:00<small>Kitchen</small></button></div><div></div>
+
+        <div class="who"><span class="mag" style="background:#fff;border-style:dashed" aria-hidden="true">?</span><div><b>Open</b><small>3 shifts</small></div></div>
+        <div></div>
+        <div class="today-col"><button class="tile open" type="button"><span>17:00–23:00</span>Who wants it?</button></div>
+        <div><button class="tile open" type="button"><span>07:00–15:00</span>Who wants it?</button></div><div></div><div></div>
+      </div>
+    </div></main>
+
+    <aside class="side" aria-label="Today">
+      <section class="card" aria-labelledby="on"><h2 id="on">On Site Now</h2>
+        <div class="big num">14<small>/21</small></div>
+        <div class="mags" aria-hidden="true"><span class="mag" style="background:var(--p1)">AK</span><span class="mag" style="background:var(--p3)">DP</span><span class="mag" style="background:var(--p4)">NA</span><span class="mag" style="background:var(--p2)">LM</span><span class="mag" style="background:#fff">+10</span></div>
+        <p style="color:var(--muted)">3 shifts still need someone.</p>
+      </section>
+      <section class="card" aria-labelledby="ph"><h2 id="ph">Staff Phone</h2>
+        <div class="stage"><p style="font-weight:700;font-size:14px;color:#1E6B49">Inside the zone · 38 m</p><div class="num" style="font-size:40px;line-height:1;letter-spacing:-.05em">07:00</div><button class="btn" type="button">Clock In</button></div>
+      </section>
+      <section class="card" aria-labelledby="fd"><h2 id="fd">Just Now</h2>
+        <ul class="feed" aria-live="polite"><li><span>Dev clocked in</span><time class="num">13:14</time></li><li><span>Sam clocked out</span><time class="num">13:02</time></li><li><span>Amira claimed Fri 17:00</span><time class="num">12:51</time></li></ul>
+      </section>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

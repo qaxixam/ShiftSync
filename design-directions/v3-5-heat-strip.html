@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#EEF1F4">
+<title>ShiftSync · Heat Strip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Concept 5, "Heat Strip": coverage first. Rows are roles at each site, columns are hours.
+   Each cell shows people scheduled over people needed, so gaps are visible by number AND colour (never colour alone). */
+:root{
+  --bg:#EEF1F4; --panel:#fff; --line:#D9DEE4; --ink:#14202E; --muted:#556272;
+  --short2:#C93A22; --short1:#F2A28A; --ok:#E4EAEE; --over:#A9C8D8; --none:#F7F8FA;
+  --r:12px; --sans:"Schibsted Grotesk",system-ui,sans-serif; --mono:"Red Hat Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;z-index:9}.skip:focus{top:12px}
+.wrap{max-width:1300px;margin:0 auto;padding:18px 24px 56px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:20px;letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.brand i{display:grid;grid-template-columns:repeat(3,7px);gap:2px}.brand i b{width:7px;height:7px;border-radius:2px;display:block}
+nav{display:flex;gap:2px}nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;color:var(--muted);text-decoration:none;font-weight:600;border-radius:8px;transition:background-color .15s,color .15s}
+nav a:hover{background:#fff;color:var(--ink)}nav a[aria-current=page]{background:var(--ink);color:#fff}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:end;margin:26px 0 16px}
+h1{font:800 clamp(28px,4.4vw,48px)/1.02 var(--sans);letter-spacing:-.04em;max-width:18ch;text-wrap:balance}
+.sub{color:var(--muted);margin-top:8px}
+.gap-card{background:var(--short2);color:#fff;border-radius:var(--r);padding:14px 20px;min-width:190px}
+.gap-card b{font:600 44px/1 var(--mono);letter-spacing:-.05em;display:block}.gap-card span{font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.hm{overflow-x:auto}
+.grid{min-width:860px;display:grid;grid-template-columns:150px repeat(17,minmax(0,1fr));gap:3px;align-items:stretch}
+.hh{font:500 11px var(--mono);color:var(--muted);text-align:center;padding-bottom:4px}
+.rl{display:flex;flex-direction:column;justify-content:center;line-height:1.2;padding-right:8px}.rl b{font-weight:700;font-size:14px}.rl small{color:var(--muted);font-size:12px}
+.c{height:46px;border-radius:5px;display:grid;place-items:center;font:600 12px var(--mono);cursor:pointer;border:0;color:var(--ink);transition:transform .12s ease-out}
+.c:hover{transform:translateY(-2px)}
+.c.s2{background:var(--short2);color:#fff}.c.s1{background:var(--short1)}.c.ok{background:var(--ok)}.c.ov{background:var(--over)}.c.nn{background:var(--none);color:#9aa4b0;cursor:default}
+.nowc{outline:2px solid var(--ink);outline-offset:1px}
+.key{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:13px}.key span{display:inline-flex;align-items:center;gap:6px}.key i{width:18px;height:14px;border-radius:3px;display:inline-block}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px}
+.panel h2{font:700 14px var(--sans);margin-bottom:8px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.li:first-of-type{border-top:0}
+.li b{display:block;font-size:14px}.li small{color:var(--muted);font-size:12px}
+.btn{min-height:44px;padding:0 16px;border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:#fff;font:700 14px var(--sans);cursor:pointer;transition:transform .12s,background-color .15s}
+.btn:hover{background:#2a3a4d}.btn:active{transform:scale(.96)}.btn.line{background:#fff;color:var(--ink)}.btn.line:hover{background:var(--bg)}
+.lb{list-style:none;padding:0}.lb li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;padding:9px 0;border-top:1px solid var(--line)}.lb li:first-child{border-top:0}.lb .n{font:600 13px var(--mono);color:var(--muted)}
+.ph .t{color:#1E6B49;font-weight:700;font-size:13px}.ph .time{font:600 40px/1.1 var(--mono);letter-spacing:-.05em;margin:4px 0 10px}.ph .btn{width:100%;min-height:52px;font-size:16px}
+@media (max-width:1000px){.head{grid-template-columns:1fr}.cols{grid-template-columns:1fr}nav{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#hm">Skip to the Coverage Grid</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"><b style="background:#C93A22"></b><b style="background:#F2A28A"></b><b style="background:#E4EAEE"></b><b style="background:#F2A28A"></b><b style="background:#E4EAEE"></b><b style="background:#A9C8D8"></b><b style="background:#E4EAEE"></b><b style="background:#E4EAEE"></b><b style="background:#A9C8D8"></b></i>ShiftSync</div>
+    <nav aria-label="Main"><a href="#" aria-current="page">Coverage</a><a href="#">Roster</a><a href="#">Open Shifts</a><a href="#">Attendance</a><a href="#">People</a></nav>
+  </header>
+
+  <div class="head">
+    <div><h1>Pier Rd Is Short From 12:00 to 17:00</h1><p class="sub"><time datetime="2026-11-17">Tue 17 Nov</time> · 14 of 21 on site · numbers show scheduled / needed</p></div>
+    <div class="gap-card"><b>9</b><span>person-hours short today</span></div>
+  </div>
+
+  <section class="panel hm" id="hm" aria-label="Coverage by hour"><div class="grid" id="grid" role="grid"></div>
+    <div class="key"><span><i style="background:var(--short2)"></i>2 short</span><span><i style="background:var(--short1)"></i>1 short</span><span><i style="background:var(--ok)"></i>Covered</span><span><i style="background:var(--over)"></i>Extra</span><span><i style="background:var(--none);border:1px solid var(--line)"></i>Closed</span><span><i style="background:transparent;outline:2px solid var(--ink);outline-offset:1px"></i>Now</span></div>
+  </section>
+
+  <div class="cols">
+    <section class="panel" aria-labelledby="o"><h2 id="o">Fill the Gaps · 3 Open Shifts</h2>
+      <div class="li"><div><b class="num">Today 17:00–23:00</b><small>Pier Rd · Closing</small></div><button class="btn" type="button" aria-label="Assign Today 17:00 shift">Assign</button></div>
+      <div class="li"><div><b class="num">Wed 07:00–15:00</b><small>Harbor St · Counter</small></div><button class="btn line" type="button" aria-label="Assign Wednesday 07:00 shift">Assign</button></div>
+      <div class="li"><div><b class="num">Sat 10:00–16:00</b><small>Harbor St · Floor</small></div><button class="btn line" type="button" aria-label="Assign Saturday 10:00 shift">Assign</button></div>
+    </section>
+    <section class="panel ph" aria-labelledby="p"><h2 id="p">Staff Phone</h2><div class="t">Inside the zone · 38 m</div><div class="time">07:00</div><button class="btn" type="button">Clock In</button></section>
+    <section class="panel" aria-labelledby="l"><h2 id="l">On-Time Streak · 30 Days</h2><ol class="lb"><li><span class="n">1</span>Amira Khan<span class="num">28</span></li><li><span class="n">2</span>Lena Meyer<span class="num">25</span></li><li><span class="n">3</span>Tomás Reyes<span class="num">22</span></li></ol></section>
+  </div>
+</div>
+<script>
+/* sample coverage data, hours 06..22: [row, site, have[], need[]] */
+const rows=[
+["Counter","Harbor St",[1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1],[1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1]],
+["Kitchen","Harbor St",[0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],[1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1]],
+["Counter","Pier Rd",[0,0,0,1,1,1,1,1,2,2,2,2,2,2,2,1,0],[0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1]],
+["Floor","Pier Rd",[0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0],[0,0,0,0,1,1,1,2,2,2,2,2,2,2,2,2,1]]];
+const g=document.getElementById("grid");let h='<div></div>';
+for(let i=0;i<17;i++)h+=`<div class="hh" role="columnheader">${String(i+6).padStart(2,"0")}</div>`;
+rows.forEach(r=>{h+=`<div class="rl" role="rowheader"><b>${r[0]}</b><small>${r[1]}</small></div>`;
+ r[2].forEach((have,i)=>{const need=r[3][i],d=have-need;let c=need===0&&have===0?"nn":d<=-2?"s2":d===-1?"s1":d>0?"ov":"ok";
+  const lab=need===0&&have===0?"":`${have}/${need}`,now=i===7?" nowc":"";
+  h+=`<button class="c ${c}${now}" type="button" role="gridcell" aria-label="${r[0]} ${r[1]} ${String(i+6).padStart(2,"0")}:00, ${have} of ${need} scheduled"${c==="nn"?" tabindex='-1'":""}>${lab}</button>`})});
+g.innerHTML=h;
+</script>
+</body>
+</html>

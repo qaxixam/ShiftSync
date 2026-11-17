@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F4F5F7">
+<title>ShiftSync · Metro Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Concept 3, "Metro Map": every shift is a transit line. Stations are IN, NOW and OUT.
+   Unfilled shifts are vacant lines with a "?" terminus. Service updates replace the activity feed. */
+:root{
+  --paper:#F4F5F7; --white:#fff; --ink:#14181F; --muted:#586272; --rule:#DCE0E6;
+  --red:#D7263D; --blue:#1B6CA8; --green:#2A8A3A; --orange:#E07B00; --teal:#0B8587; --grey:#8B94A3;
+  --r:10px; --sans:"Figtree",system-ui,sans-serif; --mono:"Red Hat Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a,button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.skip{position:absolute;left:12px;top:-60px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;z-index:9}.skip:focus{top:12px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px 56px}
+.bar{background:var(--ink);color:#fff}.bar .in{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px}
+.brand{font-weight:800;font-size:19px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.brand svg{width:26px;height:26px}
+nav{display:flex;gap:2px}nav a{min-height:44px;display:inline-flex;align-items:center;padding:0 14px;color:#C3CAD6;text-decoration:none;font-weight:600;border-radius:6px;transition:color .15s,background-color .15s}
+nav a:hover{color:#fff;background:#262d3a}nav a[aria-current=page]{color:#fff;box-shadow:inset 0 -3px 0 var(--red)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin:26px 0 16px}
+h1{font:800 clamp(28px,4vw,42px)/1.05 var(--sans);letter-spacing:-.035em;max-width:20ch;text-wrap:balance}
+.sub{color:var(--muted);margin-top:6px}
+.kpis{display:flex;gap:10px;flex-wrap:wrap}
+.kpi{background:var(--white);border:1px solid var(--rule);border-radius:var(--r);padding:10px 16px;min-width:116px}
+.kpi b{display:block;font:600 30px/1 var(--mono);letter-spacing:-.05em}.kpi span{color:var(--muted);font-size:13px}
+.kpi.hot b{color:var(--red)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.map{background:var(--white);border:1px solid var(--rule);border-radius:var(--r);padding:12px 12px 6px;overflow-x:auto}
+.map svg{min-width:760px;width:100%;height:auto;display:block}
+.cap{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:13px;padding:6px 8px 8px}
+.cap i{display:inline-block;width:12px;height:12px;border-radius:50%;border:3px solid var(--ink);background:#fff;margin-right:6px;vertical-align:-2px}
+.cap i.now{background:var(--ink)}.cap i.q{border-style:dashed;border-color:var(--grey)}
+.side{display:grid;gap:16px}
+.card{background:var(--white);border:1px solid var(--rule);border-radius:var(--r);padding:14px 16px}
+.card h2{font:700 14px var(--sans);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card h2 .badge{width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font:700 12px var(--mono)}
+.upd{list-style:none;padding:0;display:grid;gap:10px}
+.upd li{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:start;font-size:14px}
+.upd i{width:10px;height:10px;border-radius:50%;margin-top:6px}
+.upd time{font:500 12px var(--mono);color:var(--muted);margin-top:2px}
+.vac{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--rule)}.vac:first-of-type{border-top:0}
+.vac b{display:block;font-size:14px}.vac small{color:var(--muted);font-size:12px}
+.btn{min-height:44px;padding:0 16px;border-radius:8px;border:2px solid var(--ink);background:var(--ink);color:#fff;font:700 14px var(--sans);cursor:pointer;transition:transform .12s,background-color .15s}
+.btn:hover{background:#2a323f}.btn:active{transform:scale(.96)}.btn.line{background:#fff;color:var(--ink)}.btn.line:hover{background:var(--paper)}
+.lb{list-style:none;padding:0}.lb li{display:grid;grid-template-columns:24px 1fr auto;gap:8px;padding:9px 0;border-top:1px solid var(--rule)}.lb li:first-child{border-top:0}.lb .n{font:600 13px var(--mono);color:var(--muted)}
+.phone-s{background:var(--paper);border-radius:12px;padding:12px;display:grid;gap:8px}
+.phone-s .t{color:var(--green);font-weight:700;font-size:13px}.phone-s .time{font:600 38px/1 var(--mono);letter-spacing:-.05em}
+.phone-s .btn{min-height:52px;font-size:16px;background:var(--blue);border-color:var(--blue)}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}nav{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#map">Skip to the Map</a>
+<div class="bar"><div class="in">
+  <div class="brand"><svg viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="6" cy="19" r="3.5" fill="#D7263D"/><circle cx="20" cy="7" r="3.5" fill="#1B6CA8"/><path d="M8.5 16.5 17.5 9.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>ShiftSync</div>
+  <nav aria-label="Main"><a href="#" aria-current="page">Network</a><a href="#">Roster</a><a href="#">Vacant Lines</a><a href="#">Attendance</a><a href="#">People</a></nav>
+</div></div>
+
+<div class="wrap">
+  <div class="head">
+    <div><h1>14 Lines Running, 3 Vacant</h1><p class="sub"><time datetime="2026-11-17">Tue 17 Nov</time> · Harbor &amp; Pine Cafés · 2 sites</p></div>
+    <div class="kpis" role="group" aria-label="Today at a glance">
+      <div class="kpi"><b>14<small style="font-size:16px;color:var(--muted)">/21</small></b><span>On Site</span></div>
+      <div class="kpi hot"><b>3</b><span>Vacant Lines</span></div>
+      <div class="kpi hot"><b>2</b><span>Overtime Risk</span></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <section id="map" aria-label="Today's network map">
+      <div class="map"><svg id="svg" viewBox="0 0 860 440" role="img" aria-label="Metro-style map. Each person is a coloured line running from clock-in to clock-out. Now is 13:20."></svg>
+        <div class="cap"><span><i></i>Clock-in or out</span><span><i class="now"></i>Now (13:20)</span><span><i class="q"></i>Vacant</span></div></div>
+    </section>
+
+    <aside class="side">
+      <section class="card" aria-labelledby="su"><h2 id="su"><span class="badge" aria-hidden="true">!</span>Service Updates</h2>
+        <ul class="upd" aria-live="polite">
+          <li><i style="background:var(--blue)"></i><span>Dev boarded 14 min late at Harbor St</span><time>13:14</time></li>
+          <li><i style="background:var(--grey)"></i><span>Sam’s line ended at Pier Rd</span><time>13:02</time></li>
+          <li><i style="background:var(--green)"></i><span>Amira took the Fri 17:00 line</span><time>12:51</time></li>
+          <li><i style="background:var(--orange)"></i><span>Noor’s line runs 10.5 h today</span><time>09:00</time></li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="vl"><h2 id="vl"><span class="badge" aria-hidden="true">3</span>Vacant Lines</h2>
+        <div class="vac"><div><b class="num">Today 17:00–23:00</b><small>Pier Rd · Closing</small></div><button class="btn" type="button" aria-label="Assign Today 17:00 shift">Assign</button></div>
+        <div class="vac"><div><b class="num">Wed 07:00–15:00</b><small>Harbor St · Counter</small></div><button class="btn line" type="button" aria-label="Assign Wednesday 07:00 shift">Assign</button></div>
+        <div class="vac"><div><b class="num">Sat 10:00–16:00</b><small>Harbor St · Floor</small></div><button class="btn line" type="button" aria-label="Assign Saturday 10:00 shift">Assign</button></div>
+      </section>
+      <section class="card" aria-labelledby="ph"><h2 id="ph">Staff Phone</h2>
+        <div class="phone-s"><span class="t">Inside the zone · 38 m</span><span class="time">07:00</span><button class="btn" type="button">Clock In</button></div>
+      </section>
+      <section class="card" aria-labelledby="lb"><h2 id="lb">Most Punctual · 30 Days</h2>
+        <ol class="lb"><li><span class="n">1</span>Amira Khan<span class="num">28</span></li><li><span class="n">2</span>Lena Meyer<span class="num">25</span></li><li><span class="n">3</span>Tomás Reyes<span class="num">22</span></li></ol>
+      </section>
+    </aside>
+  </div>
+</div>
+<script>
+/* sample data: [name, start, in, end, colour, state] */
+const col={r:"#D7263D",b:"#1B6CA8",g:"#2A8A3A",o:"#E07B00",t:"#0B8587",x:"#8B94A3"};
+const L=[["Amira Khan",7,6.97,15,col.g,"on"],["Dev Patel",7,7.23,15,col.b,"late"],["Noor Ahmed",9,8.92,19.5,col.o,"ot"],["Lena Meyer",11,10.95,19,col.t,"on"],["Tomás Reyes",15,null,23,col.r,"soon"],["Open · Midday",12,null,16,col.x,"vac"],["Open · Closing",17,null,23,col.x,"vac"]];
+const X0=190,X1=830,Y0=64,DY=54,hx=h=>X0+(h-6)/18*(X1-X0);
+let s="";
+for(let h=6;h<=24;h+=2){const x=hx(h);s+=`<line x1="${x}" y1="36" x2="${x}" y2="412" stroke="#E6E9EE"/><text x="${x}" y="26" text-anchor="middle" font-size="12" fill="#586272" font-family="Red Hat Mono">${String(h%24).padStart(2,"0")}</text>`}
+L.forEach((l,i)=>{const y=Y0+i*DY,x1=hx(l[1]),x2=hx(l[3]),dash=l[5]==="vac"?'stroke-dasharray="3 12"':"";
+ s+=`<text x="12" y="${y+5}" font-size="14" font-weight="700" fill="#14181F" font-family="Figtree">${l[0]}</text>`;
+ s+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${l[4]}" stroke-width="12" stroke-linecap="round" ${dash}/>`;
+ const st=(x,fill)=>`<circle cx="${x}" cy="${y}" r="9" fill="${fill}" stroke="#14181F" stroke-width="4"/>`;
+ if(l[5]==="vac"){s+=`<circle cx="${x2}" cy="${y}" r="10" fill="#fff" stroke="#8B94A3" stroke-width="3" stroke-dasharray="3 3"/><text x="${x2}" y="${y+4}" text-anchor="middle" font-size="13" font-weight="800" fill="#586272" font-family="Figtree">?</text>`}
+ else{if(l[2])s+=st(hx(l[2]),"#fff");else s+=st(x1,"#fff");s+=st(x2,"#fff")}
+ if(l[5]==="late")s+=`<text x="${hx(l[2])+14}" y="${y-14}" font-size="12" font-weight="700" fill="#1B6CA8" font-family="Red Hat Mono">+14 min</text>`;
+ if(l[5]==="ot")s+=`<text x="${hx(14)}" y="${y-14}" font-size="12" font-weight="700" fill="#E07B00" font-family="Red Hat Mono">10.5 h · overtime</text>`;
+});
+const nx=hx(13+1/3);s+=`<line x1="${nx}" y1="36" x2="${nx}" y2="412" stroke="#14181F" stroke-width="2.5"/>`;
+L.forEach((l,i)=>{if(l[5]==="on"||l[5]==="late"||l[5]==="ot")s+=`<circle cx="${nx}" cy="${Y0+i*DY}" r="7" fill="#14181F"/>`});
+s+=`<rect x="${nx-24}" y="418" width="48" height="20" rx="4" fill="#14181F"/><text x="${nx}" y="432" text-anchor="middle" font-size="12" fill="#fff" font-family="Red Hat Mono">13:20</text>`;
+document.getElementById("svg").innerHTML=s;
+</script>
+</body>
+</html>

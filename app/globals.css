@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
+/* Timecard design system: paper cards on a dark green desk blotter.
+   Navy ink stamps IN, red ink stamps what needs a manager. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --desk: #1f2b27;
+  --desk-2: #283833;
+  --desk-line: #3a4d46;
+  --on-desk: #f2ebd3;
+  --on-desk-muted: #b7c2ba;
+  --paper: #f4edd3;
+  --paper-2: #ebe2c2;
+  --ink: #1b1a16;
+  --ink-muted: #59553f;
+  --rule: #b8ac82;
+  --stamp-in: #1e3768;
+  --stamp-red: #a8261c;
+  --ok: #2e6b4c;
+  --focus: #ffd36b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-desk: var(--desk);
+  --color-desk-2: var(--desk-2);
+  --color-desk-line: var(--desk-line);
+  --color-on-desk: var(--on-desk);
+  --color-on-desk-muted: var(--on-desk-muted);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-stamp-in: var(--stamp-in);
+  --color-stamp-red: var(--stamp-red);
+  --color-ok: var(--ok);
+  --color-focus: var(--focus);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+  --radius-card: 6px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--desk);
+  color: var(--on-desk);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ink stamp: slight tilt is part of the object, hover never tilts */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  padding: 1px 7px;
+  transform: rotate(-3deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

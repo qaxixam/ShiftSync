@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShiftSync · Direction 3 · Sticker Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rethink+Sans:wght@400;500;600;700;800&family=Fragment+Mono&display=swap" rel="stylesheet">
+<style>
+/* Playful but dependable: colour-blocked tiles like stickers on a clean sheet,
+   chunky outlines and hard offset shadows, big touch targets. Built phone-first. */
+:root{
+  --sheet:#FAFAF7; --ink:#1B2233; --muted:#5E6679;
+  --mint:#BFE8D4; --sky:#BCD9F4; --blush:#F7CFC6; --sun:#FFD95E; --leaf:#2E7D5B; --coral:#E8553F;
+  --r:20px; --edge:2px solid var(--ink); --hard:4px 4px 0 var(--ink);
+  --sans:"Rethink Sans",system-ui,sans-serif; --mono:"Fragment Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--sheet);color:var(--ink);font:16px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 96px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+.logo{font:800 22px var(--sans);letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+.logo i{width:30px;height:30px;border:var(--edge);border-radius:10px;background:var(--sun);display:grid;place-items:center;font-style:normal;font-size:15px;transform:rotate(-6deg)}
+.avatar{width:42px;height:42px;border-radius:50%;border:var(--edge);background:var(--blush);display:grid;place-items:center;font-weight:700}
+h1{font:800 clamp(30px,6vw,52px)/1.02 var(--sans);letter-spacing:-.04em;max-width:16ch}
+.lede{color:var(--muted);margin:8px 0 22px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(6,1fr)}
+.tile{border:var(--edge);border-radius:var(--r);padding:18px;box-shadow:var(--hard);background:#fff}
+.tile h2{font:700 15px var(--sans);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.t-clock{grid-column:span 2;background:var(--mint)}
+.t-stat1{grid-column:span 1;background:var(--sky)}.t-stat2{grid-column:span 1;background:var(--blush)}.t-stat3{grid-column:span 2;background:var(--sun)}
+.t-roster{grid-column:span 4}.t-market{grid-column:span 2;background:var(--sky)}
+.t-live{grid-column:span 3}.t-board{grid-column:span 3}
+.stat b{font:400 44px/1 var(--mono);display:block;letter-spacing:-.05em;margin:6px 0 2px}
+.stat span{font-weight:600;font-size:14px}
+.t-clock p{font-weight:600}
+.big{font:400 56px/1 var(--mono);letter-spacing:-.05em;margin:8px 0 12px}
+.btn{font:700 17px var(--sans);width:100%;height:56px;border:var(--edge);border-radius:16px;background:var(--ink);color:#fff;box-shadow:0 4px 0 #000;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.btn:active{transform:translateY(3px) scale(.98);box-shadow:0 1px 0 #000}
+.btn.sm{height:44px;width:auto;padding:0 16px;font-size:15px;border-radius:12px;background:#fff;color:var(--ink);box-shadow:0 3px 0 var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:6px;border:var(--edge);border-radius:999px;padding:3px 11px;font-weight:700;font-size:13px;background:#fff}
+.pill.ok{background:var(--mint)}.pill.hot{background:var(--sun)}
+.rows{display:grid;gap:10px}
+.shiftrow{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px;border:var(--edge);border-radius:14px;background:var(--sheet)}
+.shiftrow .av{width:44px;height:44px;border-radius:50%;border:var(--edge);display:grid;place-items:center;font-weight:800}
+.shiftrow b{display:block}.shiftrow small{color:var(--muted);font-family:var(--mono);font-size:12px}
+.shiftrow.ot{background:var(--blush)}
+.mini{height:10px;border:var(--edge);border-radius:999px;margin-top:6px;position:relative;background:#fff;overflow:hidden}
+.mini i{position:absolute;top:0;bottom:0;background:var(--leaf)}
+.mini.ot i{background:var(--coral)}
+.feed{list-style:none;padding:0;display:grid;gap:12px}
+.feed li{display:flex;gap:12px;align-items:center}
+.feed .em{width:36px;height:36px;border:var(--edge);border-radius:12px;display:grid;place-items:center;background:var(--mint);flex:none;font-size:16px}
+.feed .em.o{background:var(--sheet)}
+.feed small{color:var(--muted);display:block;font-family:var(--mono);font-size:12px}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end;text-align:center}
+.podium div{border:var(--edge);border-radius:14px;padding:10px 6px}
+.podium .p1{background:var(--sun);height:140px}.podium .p2{background:var(--mint);height:112px}.podium .p3{background:var(--blush);height:92px}
+.podium b{display:block;font:400 28px var(--mono)}.podium span{font-weight:700;font-size:14px}
+.market{display:grid;gap:10px}
+.market .o{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;border:var(--edge);border-radius:14px;padding:10px 12px}
+.tab{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;display:flex;gap:4px;background:var(--ink);border-radius:999px;padding:6px;box-shadow:var(--hard);z-index:5}
+.tab a{color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:10px 16px;border-radius:999px}
+.tab a.on{background:var(--sun);color:var(--ink)}
+@media (max-width:900px){.t-clock,.t-roster,.t-market,.t-live,.t-board,.t-stat3{grid-column:span 6}.t-stat1,.t-stat2{grid-column:span 3}.t-clock{order:-1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><div class="logo"><i aria-hidden="true">S</i>ShiftSync</div><div class="avatar" aria-label="Maya, manager">MO</div></header>
+  <h1>Good afternoon, Maya. Three shifts still need someone.</h1>
+  <p class="lede">Harbor &amp; Pine Cafés · Tuesday 17 Nov</p>
+
+  <div class="grid">
+    <section class="tile t-clock" aria-label="Clock in">
+      <h2>Your next shift <span class="pill ok">Inside the zone</span></h2>
+      <p>Harbor St · 38 m from the door</p>
+      <div class="big">07:00</div>
+      <button class="btn">Clock in</button>
+    </section>
+    <div class="tile stat t-stat1"><span>On site</span><b>14</b><small class="mono">of 21</small></div>
+    <div class="tile stat t-stat2"><span>Open</span><b>3</b><small class="mono">shifts</small></div>
+    <div class="tile stat t-stat3"><span>Overtime risk</span><b>2</b><small>Noor and Dev are close to their limit</small></div>
+
+    <section class="tile t-roster" aria-label="Roster">
+      <h2>On shift today <span class="pill">Live</span></h2>
+      <div class="rows">
+        <div class="shiftrow"><div class="av" style="background:var(--mint)">AK</div><div><b>Amira Khan</b><small>07:00 – 15:00 · Counter</small><div class="mini"><i style="left:0;width:74%"></i></div></div><span class="pill ok">On site</span></div>
+        <div class="shiftrow"><div class="av" style="background:var(--sky)">DP</div><div><b>Dev Patel</b><small>07:14 – 15:00 · Kitchen</small><div class="mini"><i style="left:0;width:70%"></i></div></div><span class="pill hot">Late 14m</span></div>
+        <div class="shiftrow ot"><div class="av" style="background:var(--sun)">NA</div><div><b>Noor Ahmed</b><small>09:00 – 19:30 · 10.5 h</small><div class="mini ot"><i style="left:0;width:42%"></i></div></div><span class="pill hot">Overtime</span></div>
+        <div class="shiftrow"><div class="av" style="background:var(--blush)">LM</div><div><b>Lena Meyer</b><small>11:00 – 19:00 · Floor</small><div class="mini"><i style="left:0;width:28%"></i></div></div><span class="pill ok">On site</span></div>
+      </div>
+    </section>
+
+    <section class="tile t-market" aria-label="Shift marketplace">
+      <h2>Up for grabs</h2>
+      <div class="market">
+        <div class="o"><div><b>Today 17:00</b><div class="mono" style="font-size:12px;color:var(--muted)">Pier Rd · closing</div></div><button class="btn sm">Claim</button></div>
+        <div class="o"><div><b>Wed 07:00</b><div class="mono" style="font-size:12px;color:var(--muted)">Harbor St · counter</div></div><button class="btn sm">Claim</button></div>
+        <div class="o"><div><b>Sat 10:00</b><div class="mono" style="font-size:12px;color:var(--muted)">Harbor St · floor</div></div><button class="btn sm">Claim</button></div>
+      </div>
+    </section>
+
+    <section class="tile t-live" aria-label="Live activity">
+      <h2>Just now</h2>
+      <ul class="feed">
+        <li><span class="em" aria-hidden="true">✓</span><div><b>Dev clocked in</b><small>13:14 · Harbor St</small></div></li>
+        <li><span class="em o" aria-hidden="true">←</span><div><b>Sam clocked out</b><small>13:02 · Pier Rd</small></div></li>
+        <li><span class="em" aria-hidden="true">+</span><div><b>Amira claimed Fri 17:00</b><small>12:51</small></div></li>
+      </ul>
+    </section>
+
+    <section class="tile t-board" aria-label="Leaderboard">
+      <h2>On-time streak <span class="mono" style="font-weight:400">30 days</span></h2>
+      <div class="podium">
+        <div class="p2"><b>25</b><span>Lena</span></div>
+        <div class="p1"><b>28</b><span>Amira</span></div>
+        <div class="p3"><b>22</b><span>Tomás</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+<nav class="tab" aria-label="Main"><a class="on" href="#">Today</a><a href="#">Shifts</a><a href="#">Swaps</a><a href="#">Team</a></nav>
+</body>
+</html>
